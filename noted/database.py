@@ -7,9 +7,7 @@ class Database:
 
     def __init__(self) -> None:
         self._database = databases.Database(self.DATABASE_URL)
-
-        [tasks] = self.start_engine()
-        self._tasks = tasks
+        self.start_engine()
 
     async def connect(self) -> None:
         await self._database.connect()
@@ -18,7 +16,7 @@ class Database:
         """Prepare tables and start the engine"""
         metadata = sqlalchemy.MetaData()
 
-        tasks = sqlalchemy.Table(
+        dataset = sqlalchemy.Table(
             "tasks",
             metadata,
             sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
@@ -33,4 +31,4 @@ class Database:
 
         metadata.create_all(engine)
 
-        return [tasks]
+        return dataset

@@ -127,8 +127,8 @@ class TextClassificationRecipe(BaseRecipe):
 
     def get_config(self):
         return {
-            "view_type": "choice",
-            "choice_style": "single" # or multiple
+            "view_type": "classification",
+            "choice_style": "single",
         }
 
     def get_sequence(self):
@@ -138,7 +138,7 @@ class TextClassificationRecipe(BaseRecipe):
         while True:
             entry = next(data_sequence)
             text = entry.get("text")
-            yield set_hashes({"text": text, "labels": ["OCCUPATION"]})
+            yield set_hashes({"text": text, "label": "OCCUPATION"})
 
 
 class Senve2VecRecipe(BaseRecipe):

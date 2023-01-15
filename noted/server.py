@@ -32,8 +32,8 @@ def get_task_view(env: Jinja2Templates, config: dict):
         component = COMPONENT_RENDERER("ner_manual")
         return env.from_string(component)
 
-    if "choice" == view_type:
-        component = COMPONENT_RENDERER("choice")
+    if "classification" == view_type:
+        component = COMPONENT_RENDERER("classification")
         return env.from_string(component)
 
 

@@ -144,8 +144,8 @@ body {
     padding: 16px;
 }
 
-/** Choice Single */
-.task_choice_single__label_container {
+/** Classification */
+.task_classification__label_container {
     display: flex;
     justify-content: center;
 
@@ -154,7 +154,7 @@ body {
     background-color: black;
 }
 
-.task_choice_single__arena {
+.task_classification__arena {
     padding: 16px;
 
     font-size: 20px;

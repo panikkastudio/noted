@@ -35,7 +35,7 @@ function init() {
   }));
 
   // Classification
-  Alpine.data("noted_choice_single", (text) => ({
+  Alpine.data("noted_classification", (text) => ({
     container: {},
   }));
 
