@@ -1,0 +1,163 @@
+body {
+    font-family: Lato, sans-serif;
+}
+
+.main__container {
+    height: 100vh;
+    padding-top: 80px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+}
+
+.task__viewport {
+    background-color: #fff;
+    border-radius: 4px;
+    padding-bottom: 32px;
+    border: 1px solid #d5d5d5;
+
+    width: 900px;
+    min-height: 300px;
+    max-height: calc(100vh - 160px);
+    color: #444;
+
+    overflow-y: scroll;
+}
+
+.task__action_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: absolute;
+    border-radius: 4px;
+    padding: 6px;
+
+    width: 900px;
+    border: 1px solid #d5d5d5;
+    background-color: #fff;
+
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+}
+
+/** Buttons */
+.task__button {
+    padding: 6px 12px;
+    border-radius: 4px;
+    background-color: greenyellow;
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+.task__button_accept {
+    color: white;
+    background-color: black;
+}
+
+.task__button_decline {
+    background-color: orangered;
+}
+
+.task__button_ignore {
+    background-color: #e3e3e3;
+}
+
+/** Text Component */
+
+.task_text__container {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.8;
+}
+
+/** Ner Component */
+
+.task_ner__container {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.8;
+
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.task_ner__annotation {
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 20px;
+    font-weight: 600;
+    background-color: #fae291;
+    cursor: pointer;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
+.task_ner__annotation:hover {
+    /* background-color: #fae19192; */
+    opacity: 0.8;
+}
+
+.task_ner__label {
+    padding-left: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 20px;
+}
+
+/** NER Manual */
+
+.task_ner_manual__container {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.8;
+}
+
+.task_ner_manual__label_container {
+    padding: 10px 16px;
+    background-color: black;
+}
+
+.task_ner_manual__label {
+    padding: 1px 10px;
+    font-weight: 600;
+    font-size: 14px;
+
+    color: white;
+    border: 2px solid #fff;
+
+    border-radius: 4px;
+    margin-right: 10px;
+
+    cursor: pointer;
+}
+
+.task_ner_manual__label_active {
+    color: black;
+    background-color: white;
+}
+
+.task_ner_manual__arena {
+    padding: 16px;
+}
+
+/** Choice Single */
+.task_choice_single__label_container {
+    display: flex;
+    justify-content: center;
+
+    color: white;
+    padding: 10px 16px;
+    background-color: black;
+}
+
+.task_choice_single__arena {
+    padding: 16px;
+
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.8;
+}

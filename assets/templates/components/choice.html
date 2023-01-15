@@ -1,0 +1,11 @@
+{% if choice_style == 'single'  %}
+<div class="task_choice_single__container" x-data='noted_choice_single("{{ text }}")'>
+    <div class="task_choice_single__label_container">
+        <span>{{ labels[0] }}</span>
+    </div>
+
+    <div  class="task_choice_single__arena">
+        <span>{{ text }}</span>
+    </div>
+</div>
+{% endif %}

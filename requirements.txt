@@ -1,0 +1,7 @@
+fastapi
+jinja2
+uvicorn[standard]
+
+databases
+sqlalchemy
+aiosqlite

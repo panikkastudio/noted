@@ -1,0 +1,16 @@
+<div class="task_ner_manual__container" x-data='noted_ner_manual("{{ text }}", {{ spans | tojson | safe }}, {{ labels | tojson | safe }})'>
+    <div class="task_ner_manual__label_container">
+        <template x-for="label in labels">
+            <button
+                x-text="label"
+                class="task_ner_manual__label"
+                :class="{ 'task_ner_manual__label_active': active_label === label }"
+                @click="set_active_label(label)"
+            ></button>
+        </template>
+    </div>
+
+    <div  class="task_ner_manual__arena">
+        <span x-html="wrapped"></span>
+    </div>
+</div>
