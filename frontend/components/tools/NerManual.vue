@@ -82,10 +82,10 @@ function tokenize(text, spans) {
         <template #body="bodyProps">
             <template v-for="span in tokenize(bodyProps.data.text, bodyProps.data.spans)">
                 <span v-if="span.type == 'span'">{{ span.text }}</span>
-                <span v-if="span.type == 'annotation'" class="annotation">
-                    {{ span.text }}
+                <mark v-if="span.type == 'annotation'" class="annotation group">
+                    <span class="group-hover:line-through">{{ span.text }}</span>
                     <span class="annotation_label">{{ span.value.label }}</span>
-                </span>
+                </mark>
             </template>
         </template>
     </Container>
