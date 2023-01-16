@@ -36,7 +36,7 @@ class Example(Base):
 
 class Database:
     def __init__(self) -> None:
-        self._database_url = f"sqlite:///./zatabase.db"
+        self._database_url = f"sqlite:///./dataset/zatabase.db"
         self._database = databases.Database(self._database_url)
         self._engine = self.start_engine()
 

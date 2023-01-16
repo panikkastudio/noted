@@ -1,3 +1,9 @@
 .vscode
 __pycache__
 *.db
+
+dataset
+!dataset/.gitkeep
+
+node_modules
+static

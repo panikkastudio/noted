@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from noted.recipe import RecipeManager
 
@@ -40,6 +41,15 @@ def create_server(manager: RecipeManager):
     app = FastAPI()
     app.mount("/static", StaticFiles(directory="assets/static"), name="static")
     templates = Jinja2Templates(directory="assets/templates")
+
+    ## Development setup
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:8001"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     ## Setup UI templating
     config = manager.config()
