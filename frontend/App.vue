@@ -1,34 +1,32 @@
 <script setup>
-import { provide } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-import { getAppConfig } from './base/fetchers'
+import { provide } from "vue";
+import { useQuery } from "@tanstack/vue-query";
+import { getAppConfig } from "./base/fetchers";
 
-import Actions from './components/Actions.vue'
+import Actions from "./components/Actions.vue";
 
-import NerBinary from './components/tools/NerBinary.vue';
-import NerManual from './components/tools/NerManual.vue';
-import Classification from './components/tools/Classification.vue';
+import NerBinary from "./components/tools/NerBinary.vue";
+import NerManual from "./components/tools/NerManual.vue";
+import Classification from "./components/tools/Classification.vue";
 
+const { data } = useQuery({ queryKey: ["app_config"], queryFn: getAppConfig });
 
-const { data } = useQuery({ queryKey: ['app_config'], queryFn: getAppConfig });
-
-provide('app_config', data);
+provide("app_config", data);
 
 function getComponent(view_type) {
-    if (view_type === 'classification') {
-        return Classification
+    if (view_type === "classification") {
+        return Classification;
     }
 
-    if (view_type === 'ner') {
+    if (view_type === "ner") {
         return NerBinary;
     }
 
-    if (view_type === 'ner_manual') {
+    if (view_type === "ner_manual") {
         return NerManual;
     }
 }
 </script>
-
 
 <template>
     <div class="h-screen w-screen bg-gray-100">
@@ -39,7 +37,6 @@ function getComponent(view_type) {
         <Actions />
     </div>
 </template>
-
 
 <style scoped>
 .logo {
