@@ -263,7 +263,7 @@ if __name__ == "__main__":
     database = Database()
 
     ## Initialization
-    recipe = TextClassificationRecipe(database=database)
+    recipe = NERManualRecipe(database=database)
     manager = RecipeManager(recipe)
 
     ## Run the server

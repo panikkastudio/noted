@@ -66,6 +66,11 @@ def create_server(manager: RecipeManager):
             "static/index.html",
         )
 
+    @app.get("/app/config", response_class=JSONResponse)
+    def app_config():
+        config = manager.config()
+        return config
+
     @app.get("/task/current", response_class=JSONResponse)
     def task_current():
         task = manager.current()
