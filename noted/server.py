@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 
 from noted.recipe import RecipeManager
 
@@ -39,8 +39,12 @@ def get_task_view(env: Jinja2Templates, config: dict):
 def create_server(manager: RecipeManager):
     ## Setup the server
     app = FastAPI()
-    app.mount("/static", StaticFiles(directory="assets/static"), name="static")
-    templates = Jinja2Templates(directory="assets/templates")
+
+    app.mount(
+        "/assets",
+        StaticFiles(directory="static/assets", html=True),
+        name="static",
+    )
 
     ## Development setup
     app.add_middleware(
@@ -53,19 +57,19 @@ def create_server(manager: RecipeManager):
 
     ## Setup UI templating
     config = manager.config()
+    templates = Jinja2Templates(directory="assets/templates")
     template = get_task_view(templates.env, config)
 
     @app.get("/", response_class=HTMLResponse)
     def read_root(request: Request):
-        task = manager.current()
-        return templates.TemplateResponse(
-            "index.html",
-            {
-                "task": task,
-                "request": request,
-                "template": template.render(**task, **config),
-            },
+        return FileResponse(
+            "static/index.html",
         )
+
+    @app.get("/task/current", response_class=JSONResponse)
+    def task_current():
+        task = manager.current()
+        return task
 
     @app.post("/task/advance", response_class=JSONResponse)
     def task_advance(request: Request):

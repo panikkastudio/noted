@@ -1,6 +1,15 @@
+<script setup>
+import Classification from './components/classification.vue';
+import Actions from './components/actions.vue'
+</script>
+
 <template>
-    <div>
-        <h1>Hello</h1>
+    <div class="h-screen w-screen bg-gray-100">
+        <div class="pt-12">
+            <Classification />
+        </div>
+
+        <Actions />
     </div>
 </template>
 
