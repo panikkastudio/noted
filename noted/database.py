@@ -2,8 +2,8 @@ import databases
 import sqlalchemy
 
 from sqlalchemy.dialects.sqlite import insert
-from sqlalchemy import Column, ForeignKey, select
 from sqlalchemy.orm import declarative_base, relationship, Session
+from sqlalchemy import Column, ForeignKey, select, UniqueConstraint
 
 
 Base = declarative_base()
@@ -24,11 +24,15 @@ class Dataset(Base):
 
 class Example(Base):
     __tablename__ = "example"
+    __table_args__ = (UniqueConstraint("dataset_id", "task_hash", name="_example_uc"),)
 
     id = Column("id", sqlalchemy.Integer, primary_key=True)
+    text = Column("text", sqlalchemy.JSON, nullable=False)
     task_hash = Column("task_hash", sqlalchemy.CHAR, nullable=False)
-    payload = Column("payload", sqlalchemy.JSON, nullable=False)
     verdict = Column("verdict", sqlalchemy.CHAR, nullable=True)
+    spans = Column("spans", sqlalchemy.JSON, nullable=True)
+    tokens = Column("tokens", sqlalchemy.JSON, nullable=True)
+    meta = Column('meta', sqlalchemy.JSON, nullable=True)
 
     dataset_id = Column(sqlalchemy.Integer, ForeignKey("dataset.id"), nullable=False)
     dataset = relationship("Dataset", back_populates="examples")
@@ -73,3 +77,18 @@ class Database:
 
             # examples = dataset.examples()
             # print(examples)
+
+    def add_example(self, dataset: str, example):
+        with Session(self._engine) as session:
+            stmt = select(Dataset).where(Dataset.name == dataset)
+            result = session.execute(stmt)
+            (dataset_,) = result.fetchone()
+
+            stmt = (
+                insert(Example)
+                .values(dataset_id=dataset_.id, **example)
+                .on_conflict_do_nothing()
+            )
+
+            session.execute(stmt)
+            session.commit()

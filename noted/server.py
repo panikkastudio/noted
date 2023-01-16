@@ -1,6 +1,6 @@
+from pydantic import BaseModel
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 
@@ -11,29 +11,8 @@ from noted.recipe import RecipeManager
 THEME = {"largeText": 24}
 
 
-def get_task_view(env: Jinja2Templates, config: dict):
-    COMPONENT_RENDERER = lambda type: "{% include 'components/" + type + ".html' %}"
-    view_type = config.get("view_type")
-
-    if "text" == view_type:
-        component = COMPONENT_RENDERER(view_type)
-        return env.from_string(component)
-
-    if "html" == view_type:
-        template_raw = config.get("html_template")
-        return env.from_string(template_raw)
-
-    if "ner" == view_type:
-        component = COMPONENT_RENDERER("ner")
-        return env.from_string(component)
-
-    if "ner_manual" == view_type:
-        component = COMPONENT_RENDERER("ner_manual")
-        return env.from_string(component)
-
-    if "classification" == view_type:
-        component = COMPONENT_RENDERER("classification")
-        return env.from_string(component)
+class ResultBody(BaseModel):
+    verdict: str
 
 
 def create_server(manager: RecipeManager):
@@ -55,11 +34,6 @@ def create_server(manager: RecipeManager):
         allow_headers=["*"],
     )
 
-    ## Setup UI templating
-    config = manager.config()
-    templates = Jinja2Templates(directory="assets/templates")
-    template = get_task_view(templates.env, config)
-
     @app.get("/", response_class=HTMLResponse)
     def read_root(request: Request):
         return FileResponse(
@@ -77,10 +51,8 @@ def create_server(manager: RecipeManager):
         return task
 
     @app.post("/task/advance", response_class=JSONResponse)
-    def task_advance(request: Request):
-        print(request.body)
-        manager.result(request.body)
-
+    def task_advance(result: ResultBody):
+        manager.result(result)
         manager.advance()
         return {"message": "OK"}
 

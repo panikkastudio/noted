@@ -264,7 +264,7 @@ if __name__ == "__main__":
 
     ## Initialization
     recipe = NERManualRecipe(database=database)
-    manager = RecipeManager(recipe)
+    manager = RecipeManager(recipe, database, config={"task_name": task_name})
 
     ## Run the server
     app = create_server(manager)

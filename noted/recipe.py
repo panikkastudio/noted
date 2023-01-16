@@ -19,9 +19,17 @@ class BaseRecipe(ABC):
 
 
 class RecipeManager:
-    def __init__(self, recipe: BaseRecipe) -> None:
+    def __init__(self, recipe: BaseRecipe, database: Database, config: dict) -> None:
+        self._config = config
         self._recipe = recipe
+        self._database = database
+
+        # Initialize the first task.
         self._current_task = self._recipe.get_next_task()
+
+        # Create a dataset for the results.
+        dataset = config["task_name"]
+        self._database.add_dataset(dataset)
 
         # Used for syncronizing the advance method.
         # need this because our task arrive in a sequence.
@@ -35,7 +43,10 @@ class RecipeManager:
             self._current_task = self._recipe.get_next_task()
 
     def result(self, data):
-        print("RESULT", data)
+        dataset = self._config["task_name"]
+        example = {"verdict": data.verdict}
+        example.update(dict(self._current_task))
+        self._database.add_example(dataset, example)
 
     def current(self):
         return self._current_task
