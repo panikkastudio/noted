@@ -121,6 +121,7 @@ class TextClassificationRecipe(BaseRecipe):
     def __init__(self, database: Database) -> None:
         super().__init__(database)
         self._sequence = self.get_sequence()
+        self._database = database
 
     def get_next_task(self):
         return next(self._sequence)
@@ -134,6 +135,14 @@ class TextClassificationRecipe(BaseRecipe):
     def get_sequence(self):
         dataset = "/Users/osman/Code/AmazonReview/reives_data/reviews_01_text.jsonl"
         data_sequence = JSONL.load(dataset)
+
+        self._database.add_dataset("test-dataset")
+
+        examples = self._database.get_examples("test-dataset")
+        print("examples", examples)
+
+        datasets = self._database.get_datasets()
+        print("datasets", datasets)
 
         while True:
             entry = next(data_sequence)
@@ -249,18 +258,9 @@ class Senve2VecRecipe(BaseRecipe):
         }
 
 
-async def prepare() -> Database:
-    database = Database()
-    await database.connect()
-    return [database]
-
-
 if __name__ == "__main__":
     ## Preparation
-    print("initializing the database")
-    loop = asyncio.get_event_loop()
-    database = loop.run_until_complete(prepare())
-    print("initialized the database")
+    database = Database()
 
     ## Initialization
     recipe = TextClassificationRecipe(database=database)
