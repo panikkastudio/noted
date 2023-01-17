@@ -5,6 +5,7 @@ import { getAppConfig } from "./base/fetchers";
 
 import Actions from "./components/Actions.vue";
 
+import HTML from "./components/tools/HTML.vue";
 import NerBinary from "./components/tools/NerBinary.vue";
 import NerManual from "./components/tools/NerManual.vue";
 import Classification from "./components/tools/Classification.vue";
@@ -24,6 +25,10 @@ function getComponent(view_type) {
 
     if (view_type === "ner_manual") {
         return NerManual;
+    }
+
+    if (view_type === "html") {
+        return HTML;
     }
 }
 </script>

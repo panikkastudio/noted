@@ -1,4 +1,4 @@
-import { createApp } from "vue";
+import { createApp } from "vue/dist/vue.esm-bundler";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 
 import "./style.css";

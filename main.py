@@ -6,6 +6,7 @@ import logging
 from logging import Logger
 from noted.database import Database
 from noted.loader import JSONL
+from noted.preprocess import add_tokens
 from noted.server import create_server
 from noted.recipe import BaseRecipe, RecipeManager
 from noted.utils import set_hashes
@@ -15,7 +16,8 @@ from sense2vec import Sense2Vec
 
 
 ## Temporary (Going to make these command line argument)
-task_name = "ner_occupations"
+task_name = "sense2vec_occupations"
+# task_name = "html_test"
 seeds = ["neighbour", "friend", "wife", "husband", "uncle"]
 vector_path = "/Users/osman/Code/AmazonReview/reives_vectors/s2v_reddit_2019_lg"
 case_sensitive = False
@@ -27,7 +29,7 @@ logger = Logger("Sense2Vec Recipe")
 logger.setLevel(logging.DEBUG)
 
 
-class DummyRecipe(BaseRecipe):
+class TextRecipe(BaseRecipe):
     def __init__(self, database: Database) -> None:
         super().__init__(database)
         self._sequence = self.get_sequence()
@@ -45,6 +47,30 @@ class DummyRecipe(BaseRecipe):
         while True:
             entry = next(data_sequence)
             task = {"text": entry.get("text")}
+            yield set_hashes(task)
+
+
+class HTMLRecipe(BaseRecipe):
+    def __init__(self, database: Database) -> None:
+        super().__init__(database)
+        self._sequence = self.get_sequence()
+
+    def get_next_task(self):
+        return next(self._sequence)
+
+    def get_config(self):
+        return {
+            "view_type": "html",
+            "html_template": "<span :style='{ fontSize: theme.largeText }'>{{ word }}</span>",
+        }
+
+    def get_sequence(self):
+        dataset = "/Users/osman/Code/AmazonReview/reives_data/reviews_01_text.jsonl"
+        data_sequence = JSONL.load(dataset)
+
+        while True:
+            entry = next(data_sequence)
+            task = {"text": entry.get("text"), "word": "YOOO"}
             yield set_hashes(task)
 
 
@@ -83,7 +109,10 @@ class NERRecipe(BaseRecipe):
 class NERManualRecipe(BaseRecipe):
     def __init__(self, database: Database) -> None:
         super().__init__(database)
+
+        self._nlp = spacy.load("en_core_web_lg")
         self._sequence = self.get_sequence()
+        self._sequence = add_tokens(self._nlp, self._sequence)
 
     def get_next_task(self):
         return next(self._sequence)
@@ -97,19 +126,18 @@ class NERManualRecipe(BaseRecipe):
     def get_sequence(self):
         dataset = "/Users/osman/Code/AmazonReview/reives_data/reviews_01_text.jsonl"
         data_sequence = JSONL.load(dataset)
-        nlp = spacy.load("en_core_web_lg")
 
         while True:
             entry = next(data_sequence)
             text = entry.get("text")
-            doc = nlp(text)
+            doc = self._nlp(text)
 
             to_span = lambda t: {
                 "label": t.label_,
                 "start": t.start_char,
                 "token_start": t.start,
-                "end": t.end_char,
                 "token_end": t.end,
+                "end": t.end_char,
             }
 
             spans = [to_span(t) for t in doc.ents]
@@ -150,7 +178,7 @@ class TextClassificationRecipe(BaseRecipe):
             yield set_hashes({"text": text, "label": "OCCUPATION"})
 
 
-class Senve2VecRecipe(BaseRecipe):
+class Sense2VecRecipe(BaseRecipe):
     def __init__(self, database: Database) -> None:
         super().__init__(database)
         logger.debug("initialing the recipe")
@@ -227,7 +255,8 @@ class Senve2VecRecipe(BaseRecipe):
                     # Make sure the score is a regular float, otherwise server
                     # may fail when trying to serialize it to/from JSON
                     meta = {"score": float(score), "sense": sense}
-                    yield {"text": key, "word": word, "sense": sense, "meta": meta}
+                    task = {"text": key, "word": word, "sense": sense, "meta": meta}
+                    yield set_hashes(task)
 
                 else:
                     n_skipped += 1
@@ -254,7 +283,11 @@ class Senve2VecRecipe(BaseRecipe):
     def get_config(self):
         return {
             "view_type": "html",
-            "html_template": "<span style='font-size: {{theme.largeText}}px'>{{ word }}</span>",
+            "html_template": """
+                <div style='height: 100%; width: 100%'>
+                    <span :style='{ fontSize: theme.largeText }'>{{ word }}</span>
+                </div>
+            """,
         }
 
 

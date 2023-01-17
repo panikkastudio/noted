@@ -32,28 +32,34 @@ onBeforeUnmount(() => {
 });
 
 function onAccept() {
-    advanceTask.mutate({
-        verdict: "accept",
-    });
+    if (!advanceTask.isLoading.value) {
+        advanceTask.mutate({
+            verdict: "accept",
+        });
+    }
 }
 
 function onReject() {
-    advanceTask.mutate({
-        verdict: "reject",
-    });
+    if (!advanceTask.isLoading.value) {
+        advanceTask.mutate({
+            verdict: "reject",
+        });
+    }
 }
 
 function onIgnore() {
-    advanceTask.mutate({
-        verdict: "ignore",
-    });
+    if (!advanceTask.isLoading.value) {
+        advanceTask.mutate({
+            verdict: "ignore",
+        });
+    }
 }
 </script>
 
 <template>
-    <div class="w-full max-w-3xl absolute bottom-4 left-1/2 transform -translate-x-1/2">
-        <button @click="onAccept">Accept</button>
-        <button>Reject</button>
-        <button>Ignore</button>
+    <div class="w-full max-w-3xl absolute bottom-4 left-1/2 transform -translate-x-1/2 space-x-2">
+        <button @click="onAccept" class="text-red-600 font-bold">Accept</button>
+        <button @click="onReject" class="text-gray-900 font-bold">Reject</button>
+        <button @click="onIgnore" class="text-gray-600">Ignore</button>
     </div>
 </template>

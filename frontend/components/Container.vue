@@ -24,6 +24,13 @@ const isBusy = isLoading || isFetching;
         <div class="p-5 text-lg leading-loose text-gray-800 overflow-y-scroll max-h-full">
             <slot name="body" :data="data"></slot>
         </div>
+
+        <div v-if="data.meta" class="absolute right-0 bottom-0 text-gray-500 bg-gray-50 px-2 rounded space-x-2">
+            <span v-for="metaKey in Object.keys(data.meta)" class="text-xs space-x-1">
+                <span class="font-semibold uppercase">{{ metaKey }}:</span>
+                <span>{{ data.meta[metaKey] }}</span>
+            </span>
+        </div>
     </div>
 
     <div v-if="isBusy" class="loader_container">Loading</div>
@@ -31,7 +38,7 @@ const isBusy = isLoading || isFetching;
 
 <style scoped>
 .container {
-    @apply flex flex-col rounded overflow-hidden bg-white shadow-sm w-full max-w-3xl mx-auto min-h-[250px] max-h-[calc(100vh_-_160px)];
+    @apply relative flex flex-col rounded overflow-hidden bg-white shadow-sm w-full max-w-3xl mx-auto min-h-[250px] max-h-[calc(100vh_-_160px)];
 }
 
 .loader_container {

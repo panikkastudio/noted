@@ -20,6 +20,21 @@ onBeforeUnmount(() => {
     });
 });
 
+function getSelectedRegion(data) {
+    const { anchorNode, focusNode, anchorOffset, focusOffset } = window.getSelection();
+
+    if (anchorOffset === focusOffset && anchorNode.parentElement.id === focusNode.parentElement.id) {
+        console.log("click event");
+        return;
+    }
+
+    const range = [Number(anchorNode.parentElement.id), Number(focusNode.parentElement.id)].sort();
+
+    const tokens = data.tokens.slice(range[0], range[1] + 1);
+
+    console.log({ tokens });
+}
+
 function handleKeyboardShortcut(e) {
     const key = Number(e.key) === 0 ? 10 : Number(e.key);
 
@@ -38,27 +53,38 @@ function changeActiveLabelIndex(idx) {
     selectedLabelIndex.value = idx;
 }
 
-function tokenize(text, spans) {
+function tokenize(text, tokens, spans) {
     const result = [];
+    const punc = /[~`!@#$%^&*(){}\[\];:"'<,.>?\/\\|_+=-]/g;
+    const hasSpaceToItsLeft = (charAt) => charAt !== 0 && text[charAt - 1] !== " ";
 
-    let offset = 0;
-    let remaning = text;
+    let currentSpanIDX = 0;
+    let currentSpan = spans[currentSpanIDX];
+    let tokensWithinCurrentSpan = [];
 
-    for (const span of spans) {
-        const start = remaning.slice(0, span.start - offset);
-        const _span = remaning.substring(span.start - offset, span.end - offset);
+    for (const token of tokens) {
+        // TODO: Find the corresponting token in the text and add spaces 'IF' it has spaces in the
+        //  text itself.
+        // const type = token.text.match(punc) && token.text.length === 1 ? "punc" : "word";
+        const type = hasSpaceToItsLeft(token.start) ? "punc" : "word";
 
-        remaning = remaning.slice(-1 * (remaning.length - start.length - _span.length));
-        offset = offset + start.length + _span.length;
+        if (token.id >= currentSpan?.token_start && token.id < currentSpan?.token_end) {
+            tokensWithinCurrentSpan.push({ type, value: token });
+            continue;
+        }
 
-        result.push({ type: "span", text: start });
-        result.push({ type: "annotation", text: _span, value: span });
+        if (token.id === currentSpan?.token_end) {
+            result.push({ type: "mark", value: currentSpan, tokens: tokensWithinCurrentSpan });
+            tokensWithinCurrentSpan = [];
+
+            currentSpanIDX++;
+            currentSpan = spans[currentSpanIDX];
+        }
+
+        result.push({ type, value: token });
     }
 
-    if (remaning) {
-        result.push({ type: "span", text: remaning });
-    }
-
+    console.log(tokensWithinCurrentSpan);
     return result;
 }
 </script>
@@ -80,18 +106,45 @@ function tokenize(text, spans) {
         </template>
 
         <template #body="bodyProps">
-            <template v-for="span in tokenize(bodyProps.data.text, bodyProps.data.spans)">
-                <span v-if="span.type == 'span'">{{ span.text }}</span>
-                <mark v-if="span.type == 'annotation'" class="annotation group">
-                    <span class="group-hover:line-through">{{ span.text }}</span>
-                    <span class="annotation_label">{{ span.value.label }}</span>
-                </mark>
-            </template>
+            <div class="w-full h-full body_container" @mouseup="getSelectedRegion(bodyProps.data)">
+                <template v-for="token in tokenize(bodyProps.data.text, bodyProps.data.tokens, bodyProps.data.spans)">
+                    <span v-if="token.type !== 'mark'" class="token" :id="token.value.id" :class="{ token_punc: token.type === 'punc' }">
+                        {{ token.value.text }}
+                    </span>
+
+                    <mark v-if="token.type === 'mark'" class="annotation group">
+                        <span
+                            :id="_token.value.id"
+                            v-for="_token in token.tokens"
+                            class="token group-hover:line-through"
+                            :class="{ token_punc: _token.type === 'punc' }"
+                        >
+                            {{ _token.value.text }}
+                        </span>
+                        <span class="annotation_label">
+                            {{ token.value.label }}
+                        </span>
+                    </mark>
+                </template>
+            </div>
         </template>
     </Container>
 </template>
 
 <style scoped>
+.body_container {
+    word-wrap: pre-word;
+    white-space: pre-wrap;
+}
+.token {
+    margin: 0 2px;
+    display: inline-block;
+}
+
+.token_punc {
+    margin-left: -2px !important;
+}
+
 .label {
     @apply border border-white rounded px-2.5 font-medium;
 }
@@ -124,5 +177,6 @@ function tokenize(text, spans) {
 
 .annotation_label {
     @apply text-xs font-bold pl-1;
+    color: #6f5604;
 }
 </style>

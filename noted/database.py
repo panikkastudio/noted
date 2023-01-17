@@ -27,12 +27,9 @@ class Example(Base):
     __table_args__ = (UniqueConstraint("dataset_id", "task_hash", name="_example_uc"),)
 
     id = Column("id", sqlalchemy.Integer, primary_key=True)
-    text = Column("text", sqlalchemy.JSON, nullable=False)
     task_hash = Column("task_hash", sqlalchemy.CHAR, nullable=False)
     verdict = Column("verdict", sqlalchemy.CHAR, nullable=True)
-    spans = Column("spans", sqlalchemy.JSON, nullable=True)
-    tokens = Column("tokens", sqlalchemy.JSON, nullable=True)
-    meta = Column('meta', sqlalchemy.JSON, nullable=True)
+    content = Column("content", sqlalchemy.JSON, nullable=False)
 
     dataset_id = Column(sqlalchemy.Integer, ForeignKey("dataset.id"), nullable=False)
     dataset = relationship("Dataset", back_populates="examples")
@@ -84,11 +81,13 @@ class Database:
             result = session.execute(stmt)
             (dataset_,) = result.fetchone()
 
-            stmt = (
-                insert(Example)
-                .values(dataset_id=dataset_.id, **example)
-                .on_conflict_do_nothing()
-            )
+            values = {
+                "dataset_id": dataset_.id,
+                "task_hash": example.get("task_hash"),
+                "verdict": example.get("verdict"),
+                "content": example,
+            }
 
+            stmt = insert(Example).values(values).on_conflict_do_nothing()
             session.execute(stmt)
             session.commit()
