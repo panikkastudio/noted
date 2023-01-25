@@ -1,4 +1,5 @@
 <script setup>
+import cloneDeep from "lodash/cloneDeep";
 import { ref, inject, onMounted, onBeforeUnmount } from "vue";
 import KeyboardJS from "keyboardjs";
 
@@ -20,19 +21,36 @@ onBeforeUnmount(() => {
     });
 });
 
+function updateSpans(data, update) {
+    const _data = cloneDeep(data);
+    const tokens = getSelectedRegion(data);
+    const [firstToken, lastToken] = [tokens[0], tokens[tokens.length - 1]];
+
+    _data.spans.push({
+        label: config.value.labels[selectedLabelIndex.value],
+        start: firstToken.start,
+        end: firstToken.end,
+        token_start: firstToken.id,
+        token_end: lastToken.id + 1,
+    });
+
+    _data.spans = _data.spans.sort((a, b) => {
+        return a.start - b.start;
+    });
+
+    update(_data);
+}
+
+// TODO: Return the action as well.
 function getSelectedRegion(data) {
     const { anchorNode, focusNode, anchorOffset, focusOffset } = window.getSelection();
-
-    if (anchorOffset === focusOffset && anchorNode.parentElement.id === focusNode.parentElement.id) {
-        console.log("click event");
-        return;
-    }
-
     const range = [Number(anchorNode.parentElement.id), Number(focusNode.parentElement.id)].sort();
 
-    const tokens = data.tokens.slice(range[0], range[1] + 1);
+    if (anchorOffset === focusOffset && anchorNode.parentElement.id === focusNode.parentElement.id) {
+        return data.tokens.slice(range[0], range[1] + 1);
+    }
 
-    console.log({ tokens });
+    return data.tokens.slice(range[0], range[1] + 1);
 }
 
 function handleKeyboardShortcut(e) {
@@ -55,7 +73,6 @@ function changeActiveLabelIndex(idx) {
 
 function tokenize(text, tokens, spans) {
     const result = [];
-    const punc = /[~`!@#$%^&*(){}\[\];:"'<,.>?\/\\|_+=-]/g;
     const hasSpaceToItsLeft = (charAt) => charAt !== 0 && text[charAt - 1] !== " ";
 
     let currentSpanIDX = 0;
@@ -65,7 +82,6 @@ function tokenize(text, tokens, spans) {
     for (const token of tokens) {
         // TODO: Find the corresponting token in the text and add spaces 'IF' it has spaces in the
         //  text itself.
-        // const type = token.text.match(punc) && token.text.length === 1 ? "punc" : "word";
         const type = hasSpaceToItsLeft(token.start) ? "punc" : "word";
 
         if (token.id >= currentSpan?.token_start && token.id < currentSpan?.token_end) {
@@ -84,7 +100,10 @@ function tokenize(text, tokens, spans) {
         result.push({ type, value: token });
     }
 
-    console.log(tokensWithinCurrentSpan);
+    if (tokensWithinCurrentSpan.length > 0) {
+        result.push({ type: "mark", value: currentSpan, tokens: tokensWithinCurrentSpan });
+    }
+
     return result;
 }
 </script>
@@ -106,7 +125,7 @@ function tokenize(text, tokens, spans) {
         </template>
 
         <template #body="bodyProps">
-            <div class="w-full h-full body_container" @mouseup="getSelectedRegion(bodyProps.data)">
+            <div class="w-full h-full body_container" @mouseup="updateSpans(bodyProps.data, bodyProps.update)">
                 <template v-for="token in tokenize(bodyProps.data.text, bodyProps.data.tokens, bodyProps.data.spans)">
                     <span v-if="token.type !== 'mark'" class="token" :id="token.value.id" :class="{ token_punc: token.type === 'punc' }">
                         {{ token.value.text }}

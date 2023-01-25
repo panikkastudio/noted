@@ -28,7 +28,7 @@ def create_server(manager: RecipeManager):
     ## Development setup
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:8001"],
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
