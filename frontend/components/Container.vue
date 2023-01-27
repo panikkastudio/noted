@@ -1,5 +1,5 @@
 <script setup>
-import { ref, useSlots, watchEffect } from "vue";
+import { ref, useSlots, watchEffect, inject, provide } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import { getCurrentTask } from "../base/fetchers";
 
@@ -21,11 +21,13 @@ const isBusy = isLoading || isFetching;
 watchEffect(() => {
     if (data?.value && cachedData.value?.task_hash !== data?.value.task_hash) {
         cachedData.value = data.value;
+        provide("app_data", cachedData);
     }
 });
 
 function updateData(data) {
     cachedData.value = data;
+    provide("app_data", cachedData);
 }
 </script>
 

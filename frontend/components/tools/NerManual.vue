@@ -23,8 +23,12 @@ onBeforeUnmount(() => {
 
 function updateSpans(data, update) {
     const _data = cloneDeep(data);
-    const tokens = getSelectedRegion(data);
+    const [tokens, isClick] = getSelectedRegion(data);
     const [firstToken, lastToken] = [tokens[0], tokens[tokens.length - 1]];
+
+    if (isClick) {
+        return;
+    }
 
     _data.spans.push({
         label: config.value.labels[selectedLabelIndex.value],
@@ -41,16 +45,24 @@ function updateSpans(data, update) {
     update(_data);
 }
 
+function removeToken(firstTokenId, data, update) {
+    const _data = cloneDeep(data);
+
+    _data.spans = _data.spans.filter((s) => {
+        return !(firstTokenId >= s.token_start && firstTokenId < s.token_end);
+    });
+
+    update(_data);
+}
+
 // TODO: Return the action as well.
 function getSelectedRegion(data) {
     const { anchorNode, focusNode, anchorOffset, focusOffset } = window.getSelection();
     const range = [Number(anchorNode.parentElement.id), Number(focusNode.parentElement.id)].sort();
 
-    if (anchorOffset === focusOffset && anchorNode.parentElement.id === focusNode.parentElement.id) {
-        return data.tokens.slice(range[0], range[1] + 1);
-    }
-
-    return data.tokens.slice(range[0], range[1] + 1);
+    // de-select
+    window.getSelection().empty();
+    return [data.tokens.slice(range[0], range[1] + 1), anchorOffset === focusOffset && anchorNode.parentElement.id === focusNode.parentElement.id];
 }
 
 function handleKeyboardShortcut(e) {
@@ -131,7 +143,11 @@ function tokenize(text, tokens, spans) {
                         {{ token.value.text }}
                     </span>
 
-                    <mark v-if="token.type === 'mark'" class="annotation group">
+                    <mark
+                        class="annotation group"
+                        v-if="token.type === 'mark'"
+                        @click="removeToken(token.value.token_start, bodyProps.data, bodyProps.update)"
+                    >
                         <span
                             :id="_token.value.id"
                             v-for="_token in token.tokens"

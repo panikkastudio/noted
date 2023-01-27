@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, inject } from "vue";
 import KeyboardJS from "keyboardjs";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { advanceCurrentTask } from "../base/fetchers";
@@ -51,6 +51,7 @@ function onIgnore() {
     if (!advanceTask.isLoading.value) {
         advanceTask.mutate({
             verdict: "ignore",
+            data: inject("app_data").value,
         });
     }
 }
