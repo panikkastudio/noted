@@ -1,9 +1,9 @@
 import spacy
-import asyncio
 import uvicorn
 import logging
 
 from logging import Logger
+
 from noted.database import Database
 from noted.loader import JSONL
 from noted.preprocess import add_tokens
@@ -11,13 +11,10 @@ from noted.server import create_server
 from noted.recipe import BaseRecipe, RecipeManager
 from noted.utils import set_hashes
 
-## Temporary
+## Temporary (Going to make these command line argument)
 from sense2vec import Sense2Vec
 
-
-## Temporary (Going to make these command line argument)
 task_name = "sense2vec_occupations"
-# task_name = "html_test"
 seeds = ["neighbour", "friend", "wife", "husband", "uncle"]
 vector_path = "/Users/osman/Code/AmazonReview/reives_vectors/s2v_reddit_2019_lg"
 case_sensitive = False
@@ -361,7 +358,7 @@ class Sense2VecRecipe(BaseRecipe):
         }
 
 
-if __name__ == "__main__":
+def main():
     ## Preparation
     database = Database()
 
@@ -374,3 +371,7 @@ if __name__ == "__main__":
     config = uvicorn.Config(app, port=8000)
     server = uvicorn.Server(config)
     server.run()
+
+
+# if __name__ == "__main__":
+#     main()
