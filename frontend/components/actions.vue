@@ -51,7 +51,6 @@ function onIgnore() {
     if (!advanceTask.isLoading.value) {
         advanceTask.mutate({
             verdict: "ignore",
-            data: inject("app_data").value,
         });
     }
 }
@@ -59,8 +58,8 @@ function onIgnore() {
 
 <template>
     <div class="w-full max-w-3xl absolute bottom-4 left-1/2 transform -translate-x-1/2 space-x-2">
-        <button @click="onAccept" class="text-red-600 font-bold">Accept</button>
-        <button @click="onReject" class="text-gray-900 font-bold">Reject</button>
+        <button @click="onAccept" class="text-gray-900 font-bold">Accept</button>
+        <button @click="onReject" class="text-red-600 font-bold">Reject</button>
         <button @click="onIgnore" class="text-gray-600">Ignore</button>
     </div>
 </template>
