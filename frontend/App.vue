@@ -9,12 +9,14 @@ import HTML from "./components/tools/HTML.vue";
 import NerBinary from "./components/tools/NerBinary.vue";
 import NerManual from "./components/tools/NerManual.vue";
 import Classification from "./components/tools/Classification.vue";
+import ChoiceMulti from "./components/tools/ChoiceMulti.vue";
+import ChoiceSingle from "./components/tools/ChoiceSingle.vue";
 
 const { data } = useQuery({ queryKey: ["app_config"], queryFn: getAppConfig });
 
 provide("app_config", data);
 
-function getComponent(view_type) {
+function getComponent({ view_type, multiple }) {
     if (view_type === "classification") {
         return Classification;
     }
@@ -30,13 +32,21 @@ function getComponent(view_type) {
     if (view_type === "html") {
         return HTML;
     }
+
+    if (view_type === "choice" && !!multiple) {
+        return ChoiceMulti;
+    }
+
+    if (view_type === "choice" && !multiple) {
+        return ChoiceSingle;
+    }
 }
 </script>
 
 <template>
     <div class="h-screen w-screen bg-gray-100">
         <div v-if="data" class="pt-[80px] overflow-y-scroll">
-            <component :is="getComponent(data.view_type)"></component>
+            <component :is="getComponent(data)"></component>
         </div>
 
         <Actions />

@@ -141,7 +141,77 @@ class NERManualRecipe(BaseRecipe):
             }
 
             spans = [to_span(t) for t in doc.ents]
-            task = {"text": text, "spans": spans}
+            task = {"text": text, "spans": spans, "meta": {"rating": "4"}}
+            yield set_hashes(task)
+
+
+class ChoiceSingleRecipe(BaseRecipe):
+    def __init__(self, database: Database) -> None:
+        super().__init__(database)
+        self._sequence = self.get_sequence()
+
+    def get_next_task(self):
+        return next(self._sequence)
+
+    def get_config(self):
+        return {
+            "view_type": "choice",
+            "multiple": False,
+        }
+
+    def get_sequence(self):
+        dataset = "/Users/osman/Code/AmazonReview/reives_data/reviews_01_text.jsonl"
+        data_sequence = JSONL.load(dataset)
+
+        while True:
+            entry = next(data_sequence)
+            text = entry.get("text")
+
+            task = {
+                "text": text,
+                "meta": {"rating": "4"},
+                "options": [
+                    {"id": "BANANA", "text": "🍌 banana"},
+                    {"id": "BROCCOLI", "text": "🥦 broccoli"},
+                    {"id": "TOMATO", "text": "🍅 tomato"},
+                ],
+            }
+
+            yield set_hashes(task)
+
+
+class ChoiceMultiRecipe(BaseRecipe):
+    def __init__(self, database: Database) -> None:
+        super().__init__(database)
+        self._sequence = self.get_sequence()
+
+    def get_next_task(self):
+        return next(self._sequence)
+
+    def get_config(self):
+        return {
+            "view_type": "choice",
+            "multiple": True,
+        }
+
+    def get_sequence(self):
+        dataset = "/Users/osman/Code/AmazonReview/reives_data/reviews_01_text.jsonl"
+        data_sequence = JSONL.load(dataset)
+
+        while True:
+            entry = next(data_sequence)
+            text = entry.get("text")
+
+            task = {
+                "text": text,
+                "meta": {"rating": "4"},
+                "options": [
+                    {"id": "BANANA", "text": "🍌 banana"},
+                    {"id": "BROCCOLI", "text": "🥦 broccoli"},
+                    {"id": "TOMATO", "text": "🍅 tomato"},
+                ],
+            }
+
             yield set_hashes(task)
 
 
@@ -296,7 +366,7 @@ if __name__ == "__main__":
     database = Database()
 
     ## Initialization
-    recipe = NERManualRecipe(database=database)
+    recipe = ChoiceSingleRecipe(database=database)
     manager = RecipeManager(recipe, database, config={"task_name": task_name})
 
     ## Run the server
