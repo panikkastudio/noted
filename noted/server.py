@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 
 from noted.recipe import RecipeManager
-
+from ._internal.path import get_library_dir
 
 ## UI Theme
 THEME = {"largeText": 24}
@@ -19,11 +19,8 @@ def create_server(manager: RecipeManager):
     ## Setup the server
     app = FastAPI()
 
-    app.mount(
-        "/assets",
-        StaticFiles(directory="static/assets", html=True),
-        name="static",
-    )
+    assets_dir = f"{get_library_dir()}/_static"
+    app.mount("/assets", StaticFiles(directory=assets_dir), name="static")
 
     ## Development setup
     app.add_middleware(
@@ -36,9 +33,7 @@ def create_server(manager: RecipeManager):
 
     @app.get("/", response_class=HTMLResponse)
     def read_root(request: Request):
-        return FileResponse(
-            "static/index.html",
-        )
+        return FileResponse(f"{assets_dir}/index.html")
 
     @app.get("/app/config", response_class=JSONResponse)
     def app_config():

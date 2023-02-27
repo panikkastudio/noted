@@ -1,0 +1,5 @@
+[style]
+based_on_style = facebook
+column_limit = 150
+split_before_named_assigns = false
+dedent_closing_brackets = true

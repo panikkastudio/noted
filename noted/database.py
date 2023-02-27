@@ -5,6 +5,8 @@ from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.orm import declarative_base, relationship, Session
 from sqlalchemy import Column, ForeignKey, select, UniqueConstraint
 
+from ._internal.path import get_base_dir, create_dir_if_not_exist
+
 
 Base = declarative_base()
 
@@ -37,7 +39,11 @@ class Example(Base):
 
 class Database:
     def __init__(self) -> None:
-        self._database_url = f"sqlite:///./dataset/zatabase.db"
+        base_dir = get_base_dir()
+        database_dir = f"{base_dir}/dataset"
+        create_dir_if_not_exist(database_dir)
+
+        self._database_url = f"sqlite:///{database_dir}/zatabase.db"
         self._database = databases.Database(self._database_url)
         self._engine = self.start_engine()
 

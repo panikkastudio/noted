@@ -9,3 +9,5 @@ node_modules
 static
 .DS_Store
 
+noted.egg-info
+build
