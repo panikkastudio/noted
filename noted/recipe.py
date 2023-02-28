@@ -48,7 +48,6 @@ class RecipeManager:
     def result(self, data):
         dataset = self._config["task_name"]
         example = {**self._current_task, **data}
-        print('example', example)
         self._database.add_example(dataset, example)
 
     def current(self):

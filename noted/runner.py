@@ -10,7 +10,6 @@ def run_recipe(recipe: BaseRecipe, task_name: str):
     database = Database()
 
     ## Initialization
-    recipe = recipe(database=database)
     manager = RecipeManager(recipe, database, config={"task_name": task_name})
 
     ## Run the server
