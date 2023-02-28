@@ -7,7 +7,6 @@ from noted.database import Database
 
 class BaseRecipe(ABC):
     """Starting point of any Noted workflow. It defines what the next task is."""
-
     def __init__(self, database: Database) -> None:
         super().__init__()
 
@@ -40,12 +39,16 @@ class RecipeManager:
 
     def advance(self):
         with self._lock:
-            self._current_task = self._recipe.get_next_task()
+            try:
+                self._current_task = self._recipe.get_next_task()
+            except StopIteration:
+                print("All tasks handled.")
+                self._current_task = None
 
     def result(self, data):
         dataset = self._config["task_name"]
-        example = {"verdict": data.verdict}
-        example.update(dict(self._current_task))
+        example = {**self._current_task, **data}
+        print('example', example)
         self._database.add_example(dataset, example)
 
     def current(self):

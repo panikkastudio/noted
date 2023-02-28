@@ -15,7 +15,7 @@ export async function getCurrentTask() {
 }
 
 export async function advanceCurrentTask(data) {
-    console.log(data);
     const d = await axios.post(getURL("/task/advance"), data);
+    console.log("Advance", data);
     return d.data;
 }

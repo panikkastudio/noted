@@ -1,12 +1,15 @@
+from __future__ import annotations
+
 import databases
 import sqlalchemy
 
+from typing import List
+
 from sqlalchemy.dialects.sqlite import insert
-from sqlalchemy.orm import declarative_base, relationship, Session
 from sqlalchemy import Column, ForeignKey, select, UniqueConstraint
+from sqlalchemy.orm import declarative_base, relationship, Session, Mapped
 
 from ._internal.path import get_base_dir, create_dir_if_not_exist
-
 
 Base = declarative_base()
 
@@ -17,16 +20,18 @@ class Dataset(Base):
     id = Column("id", sqlalchemy.Integer, primary_key=True)
     name = Column("name", sqlalchemy.CHAR, unique=True)
 
-    examples = relationship(
-        "Example",
-        back_populates="dataset",
-        cascade="all, delete-orphan",
-    )
+    examples: Mapped[List["Example"]] = relationship("Example", back_populates="dataset", cascade="all, delete-orphan")
+
+    def __str__(self) -> str:
+        return f"Dataset(id: {self.id}, name: {self.name})"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 class Example(Base):
     __tablename__ = "example"
-    __table_args__ = (UniqueConstraint("dataset_id", "task_hash", name="_example_uc"),)
+    __table_args__ = (UniqueConstraint("dataset_id", "task_hash", name="_example_uc"), )
 
     id = Column("id", sqlalchemy.Integer, primary_key=True)
     task_hash = Column("task_hash", sqlalchemy.CHAR, nullable=False)
@@ -34,7 +39,30 @@ class Example(Base):
     content = Column("content", sqlalchemy.JSON, nullable=False)
 
     dataset_id = Column(sqlalchemy.Integer, ForeignKey("dataset.id"), nullable=False)
-    dataset = relationship("Dataset", back_populates="examples")
+    dataset: Mapped["Dataset"] = relationship("Dataset", back_populates="examples")
+
+    def __str__(self) -> str:
+        return f"Dataset(id: {self.id}, name: {self.task_hash})"
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    @staticmethod
+    def dict_to_example(dataset: Dataset, example: dict):
+        return {
+            "dataset_id": dataset.id,
+            "task_hash": example.get("_task_hash"),
+            "verdict": example.get("_verdict"),
+            "content": dict([(k, v) for (k, v) in example.items() if not k.startswith('_')]),
+        }
+
+    @staticmethod
+    def example_to_dict(example: Example):
+        return {
+            "_task_hash": example.task_hash,
+            "_verdict": example.verdict,
+            **example.content,
+        }
 
 
 class Database:
@@ -74,26 +102,21 @@ class Database:
             stmt = select(Dataset).where(Dataset.name == dataset)
             result = session.execute(stmt)
 
-            dataset = result.fetchone()
+            (dataset, ) = result.fetchone()
             if dataset is None:
                 return None
 
-            # examples = dataset.examples()
-            # print(examples)
+            for example in dataset.examples:
+                yield Example.example_to_dict(example)
 
     def add_example(self, dataset: str, example):
         with Session(self._engine) as session:
             stmt = select(Dataset).where(Dataset.name == dataset)
             result = session.execute(stmt)
-            (dataset_,) = result.fetchone()
+            (dataset_, ) = result.fetchone()
 
-            values = {
-                "dataset_id": dataset_.id,
-                "task_hash": example.get("task_hash"),
-                "verdict": example.get("verdict"),
-                "content": example,
-            }
+            values = Example.dict_to_example(dataset_, example)
+            stmt = insert(Example).values(values).on_conflict_do_update(set_=values)
 
-            stmt = insert(Example).values(values).on_conflict_do_nothing()
             session.execute(stmt)
             session.commit()

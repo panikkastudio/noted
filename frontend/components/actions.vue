@@ -1,11 +1,14 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, inject } from "vue";
 import KeyboardJS from "keyboardjs";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
+
+import { useCachedData } from "../store";
 import { advanceCurrentTask } from "../base/fetchers";
 
 const ready = ref(false);
 const queryClient = useQueryClient();
+const cachedData = useCachedData();
 
 const advanceTask = useMutation({
     mutationFn: advanceCurrentTask,
@@ -33,8 +36,11 @@ onBeforeUnmount(() => {
 
 function onAccept() {
     if (!advanceTask.isLoading.value) {
+        console.log(Object.assign({}, cachedData.data.value));
+
         advanceTask.mutate({
-            verdict: "accept",
+            _verdict: "accept",
+            ...Object.assign({}, cachedData.data.value),
         });
     }
 }
@@ -42,7 +48,7 @@ function onAccept() {
 function onReject() {
     if (!advanceTask.isLoading.value) {
         advanceTask.mutate({
-            verdict: "reject",
+            _verdict: "reject",
         });
     }
 }
@@ -50,7 +56,7 @@ function onReject() {
 function onIgnore() {
     if (!advanceTask.isLoading.value) {
         advanceTask.mutate({
-            verdict: "ignore",
+            _verdict: "ignore",
         });
     }
 }

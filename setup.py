@@ -10,7 +10,7 @@ setup(
         "fastapi",
         "uvicorn[standard]",
         "databases",
-        "sqlalchemy",
+        "sqlalchemy==1.4.46",
         "aiosqlite",
         "typer",
         "jsonlines",

@@ -12,8 +12,6 @@ def add_tokens(nlp: Language, stream):
     }
 
     for example in stream:
-        print("next")
         doc = nlp(example["text"])
         tokens = [to_token(t) for t in doc]
-        example.update({"tokens": tokens})
-        yield example
+        yield {"tokens": tokens, **example}

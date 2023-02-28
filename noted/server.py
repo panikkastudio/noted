@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,16 +10,12 @@ from ._internal.path import get_library_dir
 THEME = {"largeText": 24}
 
 
-class ResultBody(BaseModel):
-    verdict: str
-
-
 def create_server(manager: RecipeManager):
     ## Setup the server
     app = FastAPI()
 
-    assets_dir = f"{get_library_dir()}/_static"
-    app.mount("/assets", StaticFiles(directory=assets_dir), name="static")
+    static_dir = f"{get_library_dir()}/_static"
+    app.mount("/assets", StaticFiles(directory=f"{static_dir}/assets"), name="static")
 
     ## Development setup
     app.add_middleware(
@@ -33,7 +28,7 @@ def create_server(manager: RecipeManager):
 
     @app.get("/", response_class=HTMLResponse)
     def read_root(request: Request):
-        return FileResponse(f"{assets_dir}/index.html")
+        return FileResponse(f"{static_dir}/index.html")
 
     @app.get("/app/config", response_class=JSONResponse)
     def app_config():
@@ -46,7 +41,8 @@ def create_server(manager: RecipeManager):
         return task
 
     @app.post("/task/advance", response_class=JSONResponse)
-    def task_advance(result: ResultBody):
+    async def task_advance(request: Request):
+        result = await request.json()
         manager.result(result)
         manager.advance()
         return {"message": "OK"}

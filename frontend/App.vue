@@ -5,6 +5,7 @@ import { getAppConfig } from "./base/fetchers";
 
 import Actions from "./components/Actions.vue";
 
+import Text from "./components/tools/Text.vue";
 import HTML from "./components/tools/HTML.vue";
 import NerBinary from "./components/tools/NerBinary.vue";
 import NerManual from "./components/tools/NerManual.vue";
@@ -31,6 +32,10 @@ function getComponent({ view_type, multiple }) {
 
     if (view_type === "html") {
         return HTML;
+    }
+
+    if (view_type === "text") {
+        return Text;
     }
 
     if (view_type === "choice" && !!multiple) {
