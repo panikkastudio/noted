@@ -1,4 +1,5 @@
 import uvicorn
+import uvicorn.config
 
 from noted.database import Database
 from noted.server import create_server
@@ -14,6 +15,7 @@ def run_recipe(recipe: BaseRecipe, task_name: str):
 
     ## Run the server
     app = create_server(manager)
-    config = uvicorn.Config(app, port=8000)
+    config = uvicorn.Config(app, port=8000, log_level=uvicorn.config.LOG_LEVELS['critical'])
+
     server = uvicorn.Server(config)
     server.run()
